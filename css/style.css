@@ -1,0 +1,24 @@
+/*Elements and Tags*/
+
+
+
+
+/*Map*/
+  /*Classes*/
+.map-holder {
+  width: 100%;
+  margin: 25px auto;
+}
+
+  /*Ids*/
+#map {
+  width: 100%;
+  max-width: 800px;
+  height: 600px;
+}
+
+
+/*FilterPane*/
+  /*Classes*/
+
+  /*Ids*/
