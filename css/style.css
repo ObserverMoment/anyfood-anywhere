@@ -10,15 +10,52 @@
   margin: 25px auto;
 }
 
+.infowindow-container {
+  border: 8px solid rgba(99, 133, 139, 0.3);
+  border-radius: 6px;
+  max-width: 400px;
+  padding: 10px;
+  margin: 5px;
+}
+
+.infowindow-placeName {
+  font-style: 1.2;
+}
+
+.infowindow-image {
+  margin: 6px;
+  box-shadow: 1px 0px 2px 0px grey;
+  float: left;
+}
+
+.infowindow-phone {
+  font-size: 0.9rem;
+}
+
+.infowindow-snippet {
+    font-size: 0.8rem;
+}
+
+.click-message {
+  margin-left: 60px;
+}
+
   /*Ids*/
 #map {
   width: 100%;
-  max-width: 800px;
-  height: 600px;
+  max-width: 1200px;
+  height: 800px;
 }
 
 
 /*FilterPane*/
   /*Classes*/
+.list-group-item {
+  display: inline-flex;
+  justify-content: space-between;
+}
 
   /*Ids*/
+#userLocationInput {
+  width: 50%;
+}
