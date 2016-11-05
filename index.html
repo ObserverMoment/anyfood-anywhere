@@ -16,7 +16,8 @@
   </header>
   <main class="container">
     <form data-bind="submit: mapUpdate" class="form-inline">
-      <input data-bind="userLocation" id="userLocationInput" class="form-control" type="text" placeholder="Enter the area in which you require meat here">
+      <input data-bind="meatType" id="meatTypeInput" class="form-control" type="text" placeholder="What sort of meat?">
+      <input data-bind="userLocation" id="userLocationInput" class="form-control" type="text" placeholder="Where do you want it?">
       <button id="userLocationSubmit" type="submit" class="btn btn-danger">Meat Seek!</button>
     </form>
     <section class="map-holder">

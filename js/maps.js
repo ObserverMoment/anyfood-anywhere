@@ -160,18 +160,24 @@ var viewModel = function() {
   // When the user updates this the map will re-center and the yelp search will re-run.
   self.userLocation = ko.observable();
 
+  self.meatType = ko.observable();
+
   // Linked to the submit bind of the search form. Gets the value and runs a geolocate call to get the LatLng.
   self.mapUpdate = function() {
-    var userSearchString = $('#userLocationInput').val();
+    self.userLocation($('#userLocationInput').val());
+    if ($('#meatTypeInput').val()) {
+      self.meatType($('#meatTypeInput').val());
+    }
     // Turn a search string into LatLng location.
-    self.getUserGeolocation(userSearchString);
-    // Reset search input.
+    self.getUserGeolocation(self.userLocation());
+    // Reset search inputs.
+    $('#meatTypeInput').val('');
     $('#userLocationInput').val('');
   }
 
-  self.getUserGeolocation = function(placeNameString) {
+  self.getUserGeolocation = function() {
     geocoder = new google.maps.Geocoder();
-    geocoder.geocode( { address: placeNameString }, function(results, status) {
+    geocoder.geocode( { address: self.userLocation() }, function(results, status) {
       if (status === google.maps.GeocoderStatus.OK) {
         // Reset the map and run the new yelp search
         console.log(results[0].geometry.location);
@@ -179,14 +185,14 @@ var viewModel = function() {
         // Place the 'you are here marker'.
         youAreHereMarker.setPosition(results[0].geometry.location);
         // Run the yelpSearchAPI on the search string.
-        self.yelpSearchAPI(placeNameString);
+        self.yelpSearchAPI(self.userLocation(), self.meatType());
       } else {
         console.log("Sorry but we could not locate your location, please try a different search");
       }
     });
   }
 
-  self.yelpSearchAPI = function(locationQuery) {
+  self.yelpSearchAPI = function(locationQuery, optionalQuery) {
     // Set the base Yelp API Url
     var yelp_url = 'https://api.yelp.com/v2/search';
 
@@ -200,7 +206,7 @@ var viewModel = function() {
       oauth_version : '1.0',
       callback: 'cb',            // This is crucial to include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
       location: locationQuery,
-      term: 'burgers'
+      term: optionalQuery || 'meat'
     };
 
     // Call the oauthSignature.generate function from the oauth-signature.js library included.
@@ -227,12 +233,11 @@ var viewModel = function() {
           // Do stuff on fail
           console.log("Some message?" + JSON.stringify(msg));
         });
-
   }
 
   self.createMarkersFromArray = function(placesArray) {
 
-    // Clear all current markers.
+    // Clear all current markers off the map.
     for (var i = 0; i < markersArray.length; i++) {
       markersArray[i].setMap(null);
     }

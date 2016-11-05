@@ -44,18 +44,29 @@
 #map {
   width: 100%;
   max-width: 1200px;
-  height: 800px;
+  height: 600px;
 }
 
 
 /*FilterPane*/
   /*Classes*/
-.list-group-item {
-  display: inline-flex;
-  justify-content: space-between;
+.list-group {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
 }
 
-  /*Ids*/
-#userLocationInput {
-  width: 50%;
+.list-group-item {
+  border-radius: 4px;
 }
+
+.list-group-item:hover {
+  color: rgb(237, 237, 237);
+  background-color: #ce3e3e;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+
+  /*Ids*/
