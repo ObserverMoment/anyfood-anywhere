@@ -1,15 +1,43 @@
 /*Elements and Tags*/
-
-
+body {
+  background: #a5a5a5;
+  background-image: url("../img/ZenBG-1.png"), url("../img/ZenBG-2.png");
+  background-repeat: repeat-x, repeat;
+  text-align: center;
+}
+input {
+  margin: 3px 3px;
+}
+button {
+  margin: 3px 3px;
+}
+@media screen and (max-width: 768px) {
+  body {
+    font-size: 16px;
+  }
+  .list-group-item {
+    padding: 5px;
+    font-size: 12px;
+  }
+}
 
 
 /*Map*/
   /*Classes*/
+.card {
+  border: 1px solid rgb(205, 205, 205);
+  box-shadow: 0px 0px 1px 0px grey;
+  padding: 12px 10px;
+  margin: 10px 2px;
+}
 .map-holder {
   width: 100%;
-  margin: 25px auto;
+  margin: 10px auto;
 }
-
+.headContent {
+  text-align: center;
+  color: rgb(240, 240, 240);
+}
 .infowindow-container {
   border: 8px solid rgba(99, 133, 139, 0.3);
   border-radius: 6px;
@@ -17,34 +45,40 @@
   padding: 10px;
   margin: 5px;
 }
-
 .infowindow-placeName {
   font-style: 1.2;
 }
-
 .infowindow-image {
   margin: 6px;
   box-shadow: 1px 0px 2px 0px grey;
   float: left;
 }
-
 .infowindow-phone {
   font-size: 0.9rem;
 }
-
 .infowindow-snippet {
     font-size: 0.8rem;
 }
-
 .click-message {
   margin-left: 60px;
 }
 
+
   /*Ids*/
-#map {
-  width: 100%;
-  max-width: 1200px;
-  height: 600px;
+@media screen and (min-width: 480px) {
+  #map {
+    width: 100%;
+    max-width: 1200px;
+    height: 600px;
+  }
+}
+@media screen and (max-width: 479px) {
+  #map {
+    width: 100%;
+    max-width: 1200px;
+    height: 400px;
+  }
+
 }
 
 
@@ -56,17 +90,35 @@
   flex-wrap: wrap;
   justify-content: space-around;
 }
-
 .list-group-item {
   border-radius: 4px;
 }
-
 .list-group-item:hover {
   color: rgb(237, 237, 237);
   background-color: #ce3e3e;
   cursor: pointer;
   border-radius: 4px;
 }
+.rating-filter-label {
+  margin-right: 10px;
+  color: #606060;
+  font-weight: bold;
+}
+.resultsInfoMobile {
+  display: none;
+}
+
+@media screen and (max-width: 960px) {
+  .resultsInfoNormal {
+    display: none;
+  }
+  .resultsInfoMobile {
+    display: block;
+  }
+}
 
 
   /*Ids*/
+#refreshRatingFilterButton {
+  margin-left: 10px;
+}
