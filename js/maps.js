@@ -171,36 +171,43 @@ var viewModel = function() {
 
   self.minRating = ko.observable(null);
 
-  self.bouncingIcon = ko.observable();
+  self.filterOpenMobile = ko.observable(false);
 
   self.enableMeatSeek = ko.computed(function() {
     return self.meatType() && self.userLocation();
   }, this);
 
-  self.animateIcon = function() {
-    if (self.bouncingIcon()) {
-      self.bouncingIcon().setAnimation(null);
+  self.toggleFilterMobile = function() {
+    // If filter is not open. Open it and change the filter toggle div text.
+    if (!self.filterOpenMobile()) {
+      $('#clicktoFilter').text('Hide Filter and Results List');
+      $('#map').height(300);
+      $('#filterPane').fadeIn();
+      self.filterOpenMobile(true);
+    } else { // Otherwise do the opposite.
+      $('#clicktoFilter').text('Open Filter and Results List');
+      $('#map').height(400);
+      $('#filterPane').fadeOut();
+      self.filterOpenMobile(false);
     }
+  }
+
+  self.animateIcon = function() {
     this.setAnimation(google.maps.Animation.BOUNCE);
-    self.bouncingIcon(this);
+  }
+
+  self.stopAnimateIcon = function() {
+    this.setAnimation(null);
   }
 
   self.zoomToRestaurant = function() {
-    // If a marker is already animated then stop it.
-    if (self.bouncingIcon()) {
-      self.bouncingIcon().setAnimation(null);
-    }
-
     // Move the map to the location of the marker, zoom in a bit, animate it, store it as bouncingIcon.
     map.setCenter(this.position);
-    this.setAnimation(google.maps.Animation.BOUNCE);
-    self.bouncingIcon(this);
 
     // Fill the main infoWindow and then open it.
     fullDetailInfoWindow.setContent(this.infoWindowContent);
     fullDetailInfoWindow.open(map, this);
   }
-
 
   // Linked to the submit bind of the search form. Gets the value and runs a geolocate call to get the LatLng.
   self.mapUpdate = function() {
@@ -288,8 +295,11 @@ var viewModel = function() {
       markersArray[i].setMap(null);
     }
 
-    // Clear the original burgerPlaces Array.
+    // Clear the previous burgerPlaces Array.
     self.burgerPlaces.removeAll();
+
+    // Clear previous heatMap data.
+    self.heatMapData.removeAll();
 
     placesArray.forEach(function(place) {
 
@@ -304,7 +314,7 @@ var viewModel = function() {
       // Create a marker for each place.
       var marker = new google.maps.Marker({
         map: map,
-        icon: "img/bad_burger_sized.png",
+        icon: "img/food-icon.png",
         title: place.name,
         position: thisLatLng,
         animation: google.maps.Animation.DROP,
@@ -312,7 +322,7 @@ var viewModel = function() {
                             '<img class="infowindow-image" src="' + place.image_url + '" alt="' + place.name + '">' +
                             '<p class="infowindow-snippet">' + place.snippet_text + '</p>' +
                             '<p class="infowindow-phone">Tel: ' + place.display_phone + '</p>' +
-                            '<img src="' + place.rating_img_url_large + '" alt="' + place.rating + ' stars"><span class="click-message">Hit Meat to Keep Open</span></div>'
+                            '<img src="' + place.rating_img_url_large + '" alt="' + place.rating + ' stars"><span class="click-message">Click icon to keep open</span></div>'
       });
 
       // Add mouseover and mouseout listeners
@@ -331,7 +341,6 @@ var viewModel = function() {
       });
 
       // Extend the current bounds object buy the LatLng of the current marker.
-      this.position
       bounds.extend(thisLatLng);
 
       markersArray.push(marker);
@@ -342,7 +351,12 @@ var viewModel = function() {
     map.fitBounds(bounds);
     map.setCenter(bounds.getCenter());
 
-    // The load up a heatMapObject, based on the heatMapData array and display it on the map.
+    // If a heatMap already has been drawn then remove it from the map.
+    if (heatMap) {
+      heatMap.setMap(null);
+    }
+
+    // Then load up a new heatMapObject, based on the heatMapData array and display it on the map.
     heatMap = new google.maps.visualization.HeatmapLayer({
       data: self.heatMapData(),
       radius: 80,
@@ -352,9 +366,12 @@ var viewModel = function() {
     // Display the new heatMap data on the map.
     heatMap.setMap(map);
 
-    if (self.burgerPlaces().length > 0) {
-      self.resultsDisplaying(true);
+    self.resultsDisplaying(true);
+
+    if (self.filterOpenMobile()) {
+      self.toggleFilterMobile();
     }
+
   }
 }
 
