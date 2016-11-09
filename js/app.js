@@ -147,7 +147,7 @@ function initMeatMap() {
   // Initialise a 'you are here marker'.
   youAreHereMarker = new google.maps.Marker({
     map: map,
-    icon: 'img/you-are-here.png',
+    icon: 'dist/img/you-are-here.png',
     animation: google.maps.Animation.DROP
   });
 
@@ -314,7 +314,7 @@ var viewModel = function() {
       // Create a marker for each place.
       var marker = new google.maps.Marker({
         map: map,
-        icon: "img/food-icon.png",
+        icon: "dist/img/food-icon.png",
         title: place.name,
         position: thisLatLng,
         animation: google.maps.Animation.DROP,

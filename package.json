@@ -1,0 +1,27 @@
+{
+  "name": "anyfood-anywhere",
+  "version": "1.0.0",
+  "description": "This is a simple web app that allows you to search for any food type (in fact pretty much any product type!) in any location and get back a set of results displayed both on a map and in list form. It is built using the Yelp search API and will return results from their database.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ObserverMoment/meat-seekers-maps-API.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ObserverMoment/meat-seekers-maps-API/issues"
+  },
+  "homepage": "https://github.com/ObserverMoment/meat-seekers-maps-API#readme",
+  "devDependencies": {
+    "autoprefixer": "^6.5.2",
+    "gulp-concat": "^2.6.0",
+    "gulp-minify-css": "^1.2.4",
+    "gulp-postcss": "^6.2.0",
+    "gulp-uglify": "^2.0.0",
+    "gulp-watch": "^4.3.10"
+  }
+}
