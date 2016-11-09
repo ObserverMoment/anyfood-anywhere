@@ -62,7 +62,7 @@ h1 {
   margin: 10px auto;
 }
 .infowindow-container {
-  border: 8px solid rgba(99, 133, 139, 0.3);
+  border: 1px solid #dcdcdc;
   border-radius: 6px;
   max-width: 400px;
   padding: 10px;
@@ -70,6 +70,7 @@ h1 {
 }
 .infowindow-placeName {
   font-style: 1.2;
+  color: #7eaf24;
 }
 .infowindow-image {
   margin: 6px;
@@ -77,13 +78,27 @@ h1 {
   float: left;
 }
 .infowindow-phone {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: rgb(150, 199, 31);
 }
 .infowindow-snippet {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
+    color: rgb(75, 75, 75);
+    font-weight: bold;
+}
+@media screen and (max-width: 520px) {
+  /*Don't show the snippet text on smaller devices as the info window does not fit on the screen*/
+  .infowindow-snippet, .click-message { display: none; }
+  .infowindow-image {
+    margin: 4px;
+    float: none;;
+  }
 }
 .click-message {
   margin-left: 60px;
+  font-size: 0.8rem;
+  color: rgb(75, 75, 75);
 }
 
   /*Ids*/

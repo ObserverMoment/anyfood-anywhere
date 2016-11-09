@@ -181,7 +181,7 @@ var viewModel = function() {
     // If filter is not open. Open it and change the filter toggle div text.
     if (!self.filterOpenMobile()) {
       $('#clicktoFilter').text('Hide Filter and Results List');
-      $('#map').height(300);
+      $('#map').height(200);
       $('#filterPane').fadeIn();
       self.filterOpenMobile(true);
     } else { // Otherwise do the opposite.
@@ -267,7 +267,7 @@ var viewModel = function() {
     // Send AJAX query via jQuery library.
     $.ajax(settings)
         .done(function(results) {
-          console.log(results);
+          // console.log(results);
           self.createMarkersFromArray(results.businesses)
         }).fail(
         function(msg) {
@@ -311,6 +311,26 @@ var viewModel = function() {
         weight: place.rating * 2000 // This will make higher rated establishments appear much "hotter" and brighter.
       });
 
+      // Create the infoWindow details - checking that the various attributes are present in the object received from Yelp.
+      var infoWindowContent = '';
+      if (place.name) {
+        infoWindowContent += '<div class="infowindow-container"><h4 class="infowindow-placeName">' + place.name + '</h4>';
+      }
+      if (place.image_url) {
+        infoWindowContent += '<img class="infowindow-image" src="' + place.image_url + '" alt="' + place.name + '">';
+      }
+      if (place.snippet_text) {
+        infoWindowContent += '<p class="infowindow-snippet">' + place.snippet_text + '</p>';
+      }
+      if (place.display_phone) {
+        infoWindowContent += '<p class="infowindow-phone">Tel: ' + place.display_phone + '</p>';
+      }
+      if (place.rating_img_url_large && place.rating > 0) {
+        infoWindowContent += '<img src="' + place.rating_img_url_large + '" alt="' + place.rating + ' stars">';
+      }
+      infoWindowContent += '<span class="click-message">Click icon to keep open</span></div>';
+
+
       // Create a marker for each place.
       var marker = new google.maps.Marker({
         map: map,
@@ -318,11 +338,7 @@ var viewModel = function() {
         title: place.name,
         position: thisLatLng,
         animation: google.maps.Animation.DROP,
-        infoWindowContent: '<div class="infowindow-container"><h4 class="infowindow-placeName">' + place.name + '</h4>' +
-                            '<img class="infowindow-image" src="' + place.image_url + '" alt="' + place.name + '">' +
-                            '<p class="infowindow-snippet">' + place.snippet_text + '</p>' +
-                            '<p class="infowindow-phone">Tel: ' + place.display_phone + '</p>' +
-                            '<img src="' + place.rating_img_url_large + '" alt="' + place.rating + ' stars"><span class="click-message">Click icon to keep open</span></div>'
+        infoWindowContent: infoWindowContent
       });
 
       // Add mouseover and mouseout listeners
