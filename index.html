@@ -5,68 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
-  <link rel="stylesheet" href="dist/css/style.min.css">
+  <!-- <link rel="stylesheet" href="dist/css/style.min.css"> -->
+  <link rel="stylesheet" href="css/style.css">
   <title>Food Finder!</title>
 </head>
 <body>
-  <header class="container mobileHeader">
+  <header class="container-fluid mobileHeader">
     <div class="logo headContent"><h1>Anyfood, Anywhere</h1></div>
   </header>
-  <main class="container">
+  <main class="container-fluid">
     <div class="card">
-      <form data-bind="submit: mapUpdate" class="form-inline headContent">
-        <input data-bind="value: meatType, valueUpdate: 'keypress'" id="meatTypeInput" class="form-control" type="text" placeholder="What sort of food?">
-        <input data-bind="value: userLocation, valueUpdate: 'keypress'" id="userLocationInput" class="form-control" type="text" placeholder="Town or city?">
+      <form data-bind="submit: getDataFromAPI" class="form-inline headContent">
+        <input data-bind="textInput: foodType" id="foodTypeInput" class="form-control" type="text" placeholder="What sort of food?">
+        <input data-bind="textInput: userLocation" id="userLocationInput" class="form-control" type="text" placeholder="Town or city?">
         <button id="userLocationSubmit" data-bind="enable: enableMeatSeek" type="submit" class="btn btn-info">Search</button>
       </form>
     </div>
-    <section class="map-holder card">
-      <div id="map"></div>
+    <section class="mainContent card">
+        <section class="filter card">
+          <div class="ratingFilter">
+            <span class="rating-filter-label">More than</span><br>
+            <label class="form-check-inline">
+              <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating1" value="1" > 1 Stars
+            </label>
+            <label class="form-check-inline">
+              <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating2" value="2"> 2 Stars
+            </label>
+            <label class="form-check-inline">
+              <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating3" value="3"> 3 Stars
+            </label>
+            <label class="form-check-inline">
+              <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating4" value="4"> 4 Stars
+            </label>
+            <label class="form-check-inline">
+              <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating5" value="5"> 5 Stars
+            </label>
+          </div>
+          <div class="textFilter">
+            <input data-bind="value: filterText" type="text" placeholder="Text Search" class="form-control">
+          </div>
+          <ul data-bind="foreach: filteredArray" class="list-group">
+            <li data-bind="text: name, click: $parent.zoomToRestaurant, event: { mouseover: $parent.animateIcon, mouseout: $parent.stopAnimateIcon }" class="list-group-item list-inline-item"></li>
+          </ul>
+        </section>
+        <section id="map" class="card"></section>
     </section>
 
-    <div id="clicktoFilter" data-bind="click: toggleFilterMobile, visible: resultsDisplaying" class="clicktoFilter card">Open Filter and Results List</div>
+    </main>
 
-    <section id="filterPane" data-bind="visible: resultsDisplaying" class="filter card">
 
-      <section class="container card">
-        <span class="rating-filter-label">Only show food providers with a rating equal to or higher than:</span><br>
-        <label class="form-check-inline">
-          <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating1" value="1"> 1 Star
-        </label>
-        <label class="form-check-inline">
-          <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating2" value="2"> 2 Star
-        </label>
-        <label class="form-check-inline">
-          <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating3" value="3"> 3 Star
-        </label>
-        <label class="form-check-inline">
-          <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating4" value="4"> 4 Star
-        </label>
-        <label class="form-check-inline">
-          <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating5" value="5"> 5 Star
-        </label>
-        <button data-bind="click: mapUpdate" id="refreshRatingFilterButton" class="btn btn-outline-danger">Filter</button>
-      </section>
-
-      <section data-bind="visible: resultsDisplaying" class="results card">
-      <h3 class="resultsInfoMobile">Click items in the list below to display more details</h3>
-      <h3 class="resultsInfoNormal">Hover over items in the list below to see the location or click them to display more details on the map</h3>
-      <ul data-bind="foreach: burgerPlaces" class="list-group">
-        <li data-bind="text: title, click: $parent.zoomToRestaurant, event: { mouseover: $parent.animateIcon, mouseout: $parent.stopAnimateIcon }" class="list-group-item list-inline-item"></li>
-      </ul>
-      </section>
-
-    </section>
-
-  </main>
 
   <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
 
-  <script src="dist/js/allScripts.min.js"></script>
-  <!-- <script src="js/oauth-signature.js"></script>
-  <script src="js/app.js"></script> -->
-  <script src="https://maps.googleapis.com/maps/api/js?libraries=visualization,geometry,drawing,places&key=AIzaSyC_3rzgTTfkQg1xlQSXn10Brp6hbIh38Q4&callback=initMeatMap"></script>
+  <!-- <script src="dist/js/allScripts.min.js"></script> -->
+  <script src="js/oauth-signature.js"></script>
+  <script src="js/app.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?libraries=visualization,geometry,drawing,places&key=AIzaSyC_3rzgTTfkQg1xlQSXn10Brp6hbIh38Q4&callback=initMap"></script>
   <script>
   </script>
 </body>

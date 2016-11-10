@@ -1,5 +1,4 @@
-// Google maps
-// Some global variables and functions for use with the map that will need to be called by KO.
+// Some global variables and functions for use with the map.
 // The variable that will hold the google.maps Map object.
 var map;
 
@@ -22,7 +21,7 @@ var mainInfoWindow;
 var fullDetailInfoWindow;
 
 // The main function that is called by the call to Google maps.
-function initMap() {
+function initMeatMap() {
   "use strict";
 
   // Customised map styles...
@@ -154,85 +153,94 @@ function initMap() {
 
 }
 
-// A place object constructor. There will be an array of these markers which will be displayed on the map and in the list view.
-var Place = function(data, infoWindowContent, marker, latLng) {
-  var self = this;
-  self.id = ko.observable(data.id);
-  self.name = ko.observable(data.name);
-  self.phone = ko.observable(data.display_phone);
-  self.image = ko.observable(data.image_url);
-  self.review_snippet = ko.observable(data.snippet_text);
-  self.rating = ko.observable(data.rating);
-  self.rating_img = ko.observable(data.rating_img_url_large);
-  self.location = latLng;
-  self.marker = marker;
-}
-
-// viewModel
 var viewModel = function() {
   var self = this;
 
-  // The two search fields.
-  self.foodType = ko.observable('burger');
-  self.userLocation = ko.observable('bristol');
+  // This will hold the current array of objects as returned from the yelp API call. Changes to this made by the filter (or by the user changing their location) will cause the markers to re-render.
+  self.burgerPlaces = ko.observableArray();
 
-  // Only allow the user to click when they have entered some value into both search fields.
-  self.enableMeatSeek = ko.computed(function() {
-    return self.foodType() && self.userLocation();
-  }, this);
+  self.resultsDisplaying = ko.observable(false);
 
-  // Observables to hold the filtering values.
-  self.minRating = ko.observable(0); //Default to 0
-  self.filterText = ko.observable();
-
-  // DOM elements for holding results should not display until there are results received.
-  self.resultsDisplaying = ko.observable(true);
-
-  // Array of Place objects that will display on the map / list and be filterable.
-  self.placesArray = ko.observableArray([]);
-
-  // Generate a filtered array based on the minRating and the textSearch
-  self.filteredArray = ko.computed(function() {
-    return ko.utils.arrayFilter(self.placesArray(), function(place) {
-      console.log(place);
-      if (place.rating() < self.minRating()) {
-        // If the rating is lower than the min rating then remove the marker from the map.
-        place.marker.setMap(null);
-      } else { // Vice versa
-        place.marker.setMap(map);
-      }
-      // Then return true to the filter if the place rating is higher than min rating.
-      return place.rating() >= self.minRating();
-    })
-  }, this)
-
-  // An array to hold the heatmap data.
+  // Array to hold the heatMap location data.
   self.heatMapData = ko.observableArray();
 
-  self.animatedIcon;
+  // When the user updates this the map will re-center and the yelp search will re-run.
+  self.userLocation = ko.observable();
 
-  // Animations and re-center map when the filter results are clicked or hovered.
+  self.meatType = ko.observable();
+
+  self.minRating = ko.observable(null);
+
+  self.filterOpenMobile = ko.observable(false);
+
+  self.enableMeatSeek = ko.computed(function() {
+    return self.meatType() && self.userLocation();
+  }, this);
+
+  self.toggleFilterMobile = function() {
+    // If filter is not open. Open it and change the filter toggle div text.
+    if (!self.filterOpenMobile()) {
+      $('#clicktoFilter').text('Hide Filter and Results List');
+      $('#map').height(200);
+      $('#filterPane').fadeIn();
+      self.filterOpenMobile(true);
+    } else { // Otherwise do the opposite.
+      $('#clicktoFilter').text('Open Filter and Results List');
+      $('#map').height(400);
+      $('#filterPane').fadeOut();
+      self.filterOpenMobile(false);
+    }
+  }
+
   self.animateIcon = function() {
-    // If we have previously animated a marker, stop animating it.
-    if (self.animatedIcon) { self.animatedIcon.setAnimation(null) };
-    this.marker.setAnimation(google.maps.Animation.BOUNCE);
+    this.setAnimation(google.maps.Animation.BOUNCE);
   }
 
   self.stopAnimateIcon = function() {
-    this.marker.setAnimation(null);
+    this.setAnimation(null);
   }
 
   self.zoomToRestaurant = function() {
     // Move the map to the location of the marker, zoom in a bit, animate it, store it as bouncingIcon.
-    map.setCenter(this.marker.position);
+    map.setCenter(this.position);
 
     // Fill the main infoWindow and then open it.
-    fullDetailInfoWindow.setContent(this.marker.infoWindowContent);
-    fullDetailInfoWindow.open(map, this.marker);
+    fullDetailInfoWindow.setContent(this.infoWindowContent);
+    fullDetailInfoWindow.open(map, this);
   }
 
-  // When the search button is clicked this will run.
-  self.getDataFromAPI = function() {
+  // Linked to the submit bind of the search form. Gets the value and runs a geolocate call to get the LatLng.
+  self.mapUpdate = function() {
+    // self.userLocation($('#userLocationInput').val());
+    // if ($('#meatTypeInput').val()) {
+    //   self.meatType($('#meatTypeInput').val());
+    // }
+    // if ( self.userLocation() && self.meatType() ) {
+    //   console.log(self.userLocation());
+    //   console.log(self.meatType());
+      // Turn a search string into LatLng location.
+      self.getUserGeolocation(self.userLocation());
+    // }
+  }
+
+  self.getUserGeolocation = function() {
+    geocoder = new google.maps.Geocoder();
+    geocoder.geocode( { address: self.userLocation() }, function(results, status) {
+      if (status === google.maps.GeocoderStatus.OK) {
+        // Reset the map and run the new yelp search
+        map.setCenter(results[0].geometry.location);
+        // Place the 'you are here marker'.
+        youAreHereMarker.setPosition(results[0].geometry.location);
+        // Run the yelpSearchAPI on the search string.
+        self.yelpSearchAPI();
+      } else {
+        alert("Sorry but we could not locate your location, please try a different search");
+      }
+    });
+  }
+
+  self.yelpSearchAPI = function() {
+    // Set the base Yelp API Url
     var yelp_url = 'https://api.yelp.com/v2/search';
 
     // create the parameters object. This will be used to generate the oauth key.
@@ -244,8 +252,8 @@ var viewModel = function() {
       oauth_signature_method: 'HMAC-SHA1',
       oauth_version : '1.0',
       callback: 'cb',            // This is crucial to include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
-      location: self.userLocation() || 'bristol',
-      term: self.foodType() || 'burgers'
+      location: self.userLocation(),
+      term: self.meatType() || 'meat'
     };
 
     // Call the oauthSignature.generate function from the oauth-signature.js library included.
@@ -263,42 +271,45 @@ var viewModel = function() {
     // Send AJAX query via jQuery library.
     $.ajax(settings)
         .done(function(results) {
-          self.createPlacesArray(results.businesses)
-        }).fail(function(msg) {
-          alert("Failed because (need to display error as DOM element)" + JSON.stringify(msg));
+          // console.log(results);
+          self.createMarkersFromArray(results.businesses)
+        }).fail(
+        function(msg) {
+          console.log("Some message?" + JSON.stringify(msg));
         });
   }
 
-  self.removeAllMarkers = function() {
-    ko.utils.arrayForEach(self.placesArray(), function(place) {
-      place.marker.setMap(null);
-    })
-  }
+  self.createMarkersFromArray = function(placesArray) {
 
-  self.createPlacesArray = function(data) {
-
-    console.log(self.minRating());
-    console.log(self.filteredArray());
     // Create a new map bounds object.
     var bounds = new google.maps.LatLngBounds();
 
-    // Clear the previous placesArray.
-    self.removeAllMarkers();
+    // Remove any results related DOM elements in case no results are returned.
+    self.resultsDisplaying(false);
+
+    // Filter the results as necessary by rating.
+    if (self.minRating() > 0) {
+      var placesArray = placesArray.filter(function(place) {
+        return place.rating >= self.minRating();
+      });
+    };
+
+    // Clear all current markers off the map.
+    for (var i = 0; i < markersArray.length; i++) {
+      markersArray[i].setMap(null);
+    }
+
+    // Clear the previous burgerPlaces Array.
+    self.burgerPlaces.removeAll();
 
     // Clear previous heatMap data.
     self.heatMapData.removeAll();
 
-    // If a heatMap already has been drawn then remove it from the map.
-    if (heatMap) {
-      heatMap.setMap(null);
-    }
+    placesArray.forEach(function(place) {
 
-    // Loop through the data and create the Places objects and add them to the placesArray.
-    data.forEach(function(place) {
       // Create a LatLng literal for each marker.
       var thisLatLng = new google.maps.LatLng(place.location.coordinate.latitude, place.location.coordinate.longitude);
-
-      // Push this location data to the heatMapData array.
+      // Push this location to the heatMapData array.
       self.heatMapData.push({
         location: thisLatLng,
         weight: place.rating * 2000 // This will make higher rated establishments appear much "hotter" and brighter.
@@ -306,12 +317,23 @@ var viewModel = function() {
 
       // Create the infoWindow details - checking that the various attributes are present in the object received from Yelp.
       var infoWindowContent = '';
-      if (place.name) { infoWindowContent += '<div class="infowindow-container"><h4 class="infowindow-placeName">' + place.name + '</h4>'; }
-      if (place.image_url) { infoWindowContent += '<img class="infowindow-image" src="' + place.image_url + '" alt="' + place.name + '">'; }
-      if (place.snippet_text) { infoWindowContent += '<p class="infowindow-snippet">' + place.snippet_text + '</p>'; }
-      if (place.display_phone) { infoWindowContent += '<p class="infowindow-phone">Tel: ' + place.display_phone + '</p>'; }
-      if (place.rating_img_url_large && place.rating > 0) { infoWindowContent += '<img src="' + place.rating_img_url_large + '" alt="' + place.rating + ' stars">'; }
+      if (place.name) {
+        infoWindowContent += '<div class="infowindow-container"><h4 class="infowindow-placeName">' + place.name + '</h4>';
+      }
+      if (place.image_url) {
+        infoWindowContent += '<img class="infowindow-image" src="' + place.image_url + '" alt="' + place.name + '">';
+      }
+      if (place.snippet_text) {
+        infoWindowContent += '<p class="infowindow-snippet">' + place.snippet_text + '</p>';
+      }
+      if (place.display_phone) {
+        infoWindowContent += '<p class="infowindow-phone">Tel: ' + place.display_phone + '</p>';
+      }
+      if (place.rating_img_url_large && place.rating > 0) {
+        infoWindowContent += '<img src="' + place.rating_img_url_large + '" alt="' + place.rating + ' stars">';
+      }
       infoWindowContent += '<span class="click-message">Click icon to keep open</span></div>';
+
 
       // Create a marker for each place.
       var marker = new google.maps.Marker({
@@ -323,7 +345,7 @@ var viewModel = function() {
         infoWindowContent: infoWindowContent
       });
 
-      // Add click, mouseover and mouseout listeners
+      // Add mouseover and mouseout listeners
       marker.addListener('mouseover', function() {
         mainInfoWindow.setContent(this.infoWindowContent);
         mainInfoWindow.open(map, this);
@@ -334,23 +356,26 @@ var viewModel = function() {
       });
 
       marker.addListener('click', function() {
-        // If we have previously animated a marker, stop animating it.
-        if (self.animatedIcon) { self.animatedIcon.setAnimation(null) };
         fullDetailInfoWindow.setContent(this.infoWindowContent);
         fullDetailInfoWindow.open(map, this);
         this.setAnimation(google.maps.Animation.BOUNCE);
-        // Save the active marker in a variable so as to ensure that only one marker at a time is animated.
-        self.animatedIcon = this;
       });
 
       // Extend the current bounds object buy the LatLng of the current marker.
       bounds.extend(thisLatLng);
 
-      self.placesArray.push( new Place(place, infoWindowContent, marker, thisLatLng) );
-    })
+      markersArray.push(marker);
+      self.burgerPlaces.push(marker);
+    });
+
     // Once loop has completed fit the map to the adjusted bounds object and center the map accordingly.
     map.fitBounds(bounds);
     map.setCenter(bounds.getCenter());
+
+    // If a heatMap already has been drawn then remove it from the map.
+    if (heatMap) {
+      heatMap.setMap(null);
+    }
 
     // Then load up a new heatMapObject, based on the heatMapData array and display it on the map.
     heatMap = new google.maps.visualization.HeatmapLayer({
@@ -361,8 +386,14 @@ var viewModel = function() {
 
     // Display the new heatMap data on the map.
     heatMap.setMap(map);
-  }
 
+    self.resultsDisplaying(true);
+
+    if (self.filterOpenMobile()) {
+      self.toggleFilterMobile();
+    }
+
+  }
 }
 
 ko.applyBindings(new viewModel());
