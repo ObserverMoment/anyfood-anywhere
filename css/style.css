@@ -1,8 +1,6 @@
 /*Elements and Tags*/
 body {
-  background: #5b5276;
-  background-image: url("../dist/img/zenbg-1.png"), url("../dist/img/zenbg-2.png");
-  background-repeat: repeat-x, repeat;
+  background-color: #ad3f3f;
   text-align: center;
 }
 input {
@@ -22,36 +20,22 @@ h1 {
   text-shadow: 0px 1px 1px grey;
   padding-top: 8px;
 }
+.hide {
+  display: none;
+}
+.show {
+  display: block;
+}
 
 /*Header*/
   /*Classes*/
-.headContent {
+.searchBoxes {
   text-align: center;
   color: rgb(240, 240, 240);
   font-size: 10px;
 }
-@media screen and (max-width: 420px) {
-  .mobileHeader {
-    font-size: 12px;
-    box-shadow: 0px 0px 2px 1px grey;
-    background-color: black;
-  }
-  h1 {
-    font-size: 24px;
-    padding-top: 5px;
-  }
-  input {
-    font-size: 16px;
-  }
-}
-
-
-
-
-/*Map*/
-  /*Classes*/
-.mainContent {
-  display: flex;
+.logo {
+  color: rgb(236, 236, 236);
 }
 .card {
   border: 1px solid rgb(205, 205, 205);
@@ -59,6 +43,70 @@ h1 {
   padding: 8px 8px;
   margin: 4px 2px;
 }
+@media screen and (max-width: 760px) {
+  .mobileHeader {
+    font-size: 12px;
+    box-shadow: 0px 0px 2px 0px grey;
+    background-color: rgb(23, 23, 23);
+  }
+  h1 {
+    font-size: 24px;
+    padding-top: 5px;
+  }
+  input {
+    font-size: 14px;
+  }
+  .container-fluid {
+    padding: 0px;
+    margin: 0px;
+  }
+  .card {
+    border: 1px solid rgb(205, 205, 205);
+    box-shadow: 0px 0px 1px 0px grey;
+    padding: 8px 2px;
+    margin: 4px 2px;
+  }
+}
+
+.openSearch {
+  display: none
+}
+@media screen and (max-width: 760px) {
+ .openSearch {
+   display: block;
+ }
+ .searchBoxes {
+   display: none;
+ }
+ .showSearchBoxes {
+   display: inline;
+ }
+ #foodTypeInput, #userLocationInput {
+   display: inline;
+   width: 45%;
+   margin-top: 10px;
+   font-size: 13px;
+ }
+ .form-control {
+   width: 90%;
+ }
+ .btn {
+   font-size: 14px;
+   padding: 5px;
+ }
+}
+
+/*Map*/
+  /*Classes*/
+.mainContent {
+  display: flex;
+  flex-direction: row;
+}
+/*@media screen and (max-width: 760px) {
+  .mainContent {
+    flex-direction: column;
+  }
+}*/
 .map-holder {
   width: 100%;
   margin: 10px auto;
@@ -110,16 +158,53 @@ h1 {
   height: 85vh;
 }
 
+@media screen and (max-width: 760px) {
+  #map {
+    transition: height 1s, width 1s;
+    width: 100%;
+    height: 82vh;
+    order: -1;
+  }
+}
 
 /*FilterPane*/
   /*Classes*/
 .filter {
   max-width: 350px;
+  left: 0;
+  top: 0;
+  transition: left 1s;
+}
+.openSearchButton, .openFilterButton {
+  display: none;
+}
+@media screen and (min-width: 760px) {
+  .openSearchButton:hover, .openFilterButton:hover {
+    background-color: rgb(237, 233, 196)
+  }
+}
+@media screen and (max-width: 760px) {
+  .filter {
+    position: absolute;
+    left: -500px;
+    top: 0;
+    z-index: 5;
+    max-width: 250px;
+  }
+  .openSearchButton, .openFilterButton {
+    display: inline;
+    padding: 5px 10px;
+  }
+}
+
+.openFilter {
+  left: 0;
 }
 .ratingFilter {
   margin-bottom: 10px;
   padding-bottom: 10px;
   border-bottom: 1px solid lightgrey;
+  font-size: 14px;
 }
 .textFilter {
   padding-bottom: 10px;
@@ -163,10 +248,6 @@ h1 {
     padding: 5px;
     font-size: 12px;
   }
-  .card {
-    padding: 8px 10px;
-    margin: 8px 2px;
-  }
 }
 
 @media screen and (max-width: 960px) {
@@ -174,14 +255,6 @@ h1 {
     display: none;
   }
   .resultsInfoMobile {
-    display: block;
-  }
-}
-@media screen and (max-width: 420px) {
-  .filter {
-    display: none;
-  }
-  .clicktoFilter {
     display: block;
   }
 }

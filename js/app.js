@@ -3,10 +3,6 @@
 // The variable that will hold the google.maps Map object.
 var map;
 
-// The users location and marker.
-var userLocation;
-var youAreHereMarker;
-
 // The variable to hold the Google PlacesService object.
 var placeServices;
 var searchOptions; // The object that gets passed to PlacesService search.
@@ -15,8 +11,6 @@ var searchOptions; // The object that gets passed to PlacesService search.
 var geocoder;
 
 var heatMap = null;
-
-var markersArray = [];
 
 var mainInfoWindow;
 var fullDetailInfoWindow;
@@ -145,39 +139,40 @@ function initMap() {
   mainInfoWindow = new google.maps.InfoWindow();
   fullDetailInfoWindow = new google.maps.InfoWindow();
 
-  // Initialise a 'you are here marker'.
-  youAreHereMarker = new google.maps.Marker({
-    map: map,
-    icon: 'dist/img/you-are-here.png',
-    animation: google.maps.Animation.DROP
+  google.maps.event.addListener(fullDetailInfoWindow,'closeclick',function(){
+    if (myViewModel.animatedIcon) {
+      myViewModel.animatedIcon.setAnimation(null);
+    }
   });
+
+  myViewModel.getDataFromAPI();
 
 }
 
 // A place object constructor. There will be an array of these markers which will be displayed on the map and in the list view.
 var Place = function(data, infoWindowContent, marker, latLng) {
   var self = this;
-  self.id = ko.observable(data.id);
-  self.name = ko.observable(data.name);
-  self.phone = ko.observable(data.display_phone);
-  self.image = ko.observable(data.image_url);
-  self.review_snippet = ko.observable(data.snippet_text);
-  self.rating = ko.observable(data.rating);
-  self.rating_img = ko.observable(data.rating_img_url_large);
+  self.id = data.id;
+  self.name = data.name;
+  self.phone = data.display_phone;
+  self.image = data.image_url;
+  self.review_snippet = data.snippet_text;
+  self.rating = data.rating;
+  self.rating_img = data.rating_img_url_large;
   self.location = latLng;
   self.marker = marker;
 }
 
 // viewModel
-var viewModel = function() {
+var ViewModel = function() {
   var self = this;
 
   // The two search fields.
-  self.foodType = ko.observable('burger');
-  self.userLocation = ko.observable('bristol');
+  self.foodType = ko.observable('Burgers');
+  self.userLocation = ko.observable('Bristol');
 
   // Only allow the user to click when they have entered some value into both search fields.
-  self.enableMeatSeek = ko.computed(function() {
+  self.enableSearch = ko.computed(function() {
     return self.foodType() && self.userLocation();
   }, this);
 
@@ -187,6 +182,18 @@ var viewModel = function() {
 
   // DOM elements for holding results should not display until there are results received.
   self.resultsDisplaying = ko.observable(true);
+  self.isFilterOpen = ko.observable(false);
+  self.showingSearchBoxes = ko.observable(false);
+
+  // Open and close the filter pane when on a mobile device.
+  self.toggleFilter = function() {
+    self.isFilterOpen(!self.isFilterOpen());
+  }
+
+  // Show and hide the search boxes when on a mobile device.
+  self.toggleSearchBoxes = function() {
+    self.showingSearchBoxes(!self.showingSearchBoxes());
+  }
 
   // Array of Place objects that will display on the map / list and be filterable.
   self.placesArray = ko.observableArray([]);
@@ -194,17 +201,25 @@ var viewModel = function() {
   // Generate a filtered array based on the minRating and the textSearch
   self.filteredArray = ko.computed(function() {
     return ko.utils.arrayFilter(self.placesArray(), function(place) {
-      console.log(place);
-      if (place.rating() < self.minRating()) {
-        // If the rating is lower than the min rating then remove the marker from the map.
-        place.marker.setMap(null);
-      } else { // Vice versa
-        place.marker.setMap(map);
+      // Set a variable ratingOK which will be a boolean depending on whether the place.rating is high enough.
+      var ratingOK = place.rating > self.minRating();
+      // Set a variable textSearchOK which will be a boolean depending on whether the text search matches anything in the place object.
+      var textSearchOK = true;
+      if (self.filterText()) {
+        // Make the users input and the place data all lowercase so they match.
+        var searchString = self.filterText().toLowerCase();
+        if ( place.id.toLowerCase().indexOf(searchString) == -1 && place.name.toLowerCase().indexOf(searchString) == -1) {
+          textSearchOK = false;
+        }
       }
+
+      // A variable to check if both filter requirements are met.
+      var showPlace = ratingOK && textSearchOK;
+      place.marker.setVisible(showPlace);
       // Then return true to the filter if the place rating is higher than min rating.
-      return place.rating() >= self.minRating();
+      return showPlace;
     })
-  }, this)
+  })
 
   // An array to hold the heatmap data.
   self.heatMapData = ko.observableArray();
@@ -277,13 +292,12 @@ var viewModel = function() {
 
   self.createPlacesArray = function(data) {
 
-    console.log(self.minRating());
-    console.log(self.filteredArray());
     // Create a new map bounds object.
     var bounds = new google.maps.LatLngBounds();
 
     // Clear the previous placesArray.
     self.removeAllMarkers();
+    self.placesArray.removeAll();
 
     // Clear previous heatMap data.
     self.heatMapData.removeAll();
@@ -361,8 +375,13 @@ var viewModel = function() {
 
     // Display the new heatMap data on the map.
     heatMap.setMap(map);
+
+    // Reset the search box placeholder text.
+    self.foodType('');
+    self.userLocation('');
   }
 
 }
 
-ko.applyBindings(new viewModel());
+var myViewModel = new ViewModel();
+ko.applyBindings(myViewModel);
