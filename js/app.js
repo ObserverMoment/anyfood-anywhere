@@ -15,6 +15,11 @@ var heatMap = null;
 var mainInfoWindow;
 var fullDetailInfoWindow;
 
+// If the call to Google API returns an error.
+function mapsError() {
+  $('#mapLoadError').show();
+}
+
 // The main function that is called by the call to Google maps.
 function initMap() {
   "use strict";
@@ -161,7 +166,7 @@ var Place = function(data, infoWindowContent, marker, latLng) {
   self.rating_img = data.rating_img_url_large;
   self.location = latLng;
   self.marker = marker;
-}
+};
 
 // viewModel
 var ViewModel = function() {
@@ -188,12 +193,12 @@ var ViewModel = function() {
   // Open and close the filter pane when on a mobile device.
   self.toggleFilter = function() {
     self.isFilterOpen(!self.isFilterOpen());
-  }
+  };
 
   // Show and hide the search boxes when on a mobile device.
   self.toggleSearchBoxes = function() {
     self.showingSearchBoxes(!self.showingSearchBoxes());
-  }
+  };
 
   // Array of Place objects that will display on the map / list and be filterable.
   self.placesArray = ko.observableArray([]);
@@ -218,33 +223,38 @@ var ViewModel = function() {
       place.marker.setVisible(showPlace);
       // Then return true to the filter if the place rating is higher than min rating.
       return showPlace;
-    })
-  })
+    });
+  });
 
   // An array to hold the heatmap data.
   self.heatMapData = ko.observableArray();
 
-  self.animatedIcon;
+  self.animatedIcon = null;
 
   // Animations and re-center map when the filter results are clicked or hovered.
   self.animateIcon = function() {
     // If we have previously animated a marker, stop animating it.
-    if (self.animatedIcon) { self.animatedIcon.setAnimation(null) };
+    if (self.animatedIcon) { self.animatedIcon.setAnimation(null); }
     this.marker.setAnimation(google.maps.Animation.BOUNCE);
-  }
+  };
 
   self.stopAnimateIcon = function() {
     this.marker.setAnimation(null);
-  }
+  };
 
   self.zoomToRestaurant = function() {
-    // Move the map to the location of the marker, zoom in a bit, animate it, store it as bouncingIcon.
-    map.setCenter(this.marker.position);
+    // If we have previously animated a marker, stop animating it.
+    if (self.animatedIcon) { self.animatedIcon.setAnimation(null); }
+
+    // Move the map to the location of the marker, zoom in a bit, animate it, store it as self.animatedIcon.
+    map.panTo(this.marker.position);
+    this.marker.setAnimation(google.maps.Animation.BOUNCE);
+    self.animatedIcon = this.marker;
 
     // Fill the main infoWindow and then open it.
     fullDetailInfoWindow.setContent(this.marker.infoWindowContent);
     fullDetailInfoWindow.open(map, this.marker);
-  }
+  };
 
   // When the search button is clicked this will run.
   self.getDataFromAPI = function() {
@@ -278,17 +288,20 @@ var ViewModel = function() {
     // Send AJAX query via jQuery library.
     $.ajax(settings)
         .done(function(results) {
-          self.createPlacesArray(results.businesses)
+          $('#yelpErrorMessage').hide();
+          self.createPlacesArray(results.businesses);
         }).fail(function(msg) {
-          alert("Failed because (need to display error as DOM element)" + JSON.stringify(msg));
+          $('#yelpErrorMessage').append(msg);
+          $('#yelpErrorMessage').show();
+          // alert("Failed to retrieve data from Yelp API: " + JSON.stringify(msg));
         });
-  }
+  };
 
   self.removeAllMarkers = function() {
     ko.utils.arrayForEach(self.placesArray(), function(place) {
       place.marker.setMap(null);
-    })
-  }
+    });
+  };
 
   self.createPlacesArray = function(data) {
 
@@ -325,7 +338,7 @@ var ViewModel = function() {
       if (place.snippet_text) { infoWindowContent += '<p class="infowindow-snippet">' + place.snippet_text + '</p>'; }
       if (place.display_phone) { infoWindowContent += '<p class="infowindow-phone">Tel: ' + place.display_phone + '</p>'; }
       if (place.rating_img_url_large && place.rating > 0) { infoWindowContent += '<img src="' + place.rating_img_url_large + '" alt="' + place.rating + ' stars">'; }
-      infoWindowContent += '<span class="click-message">Click icon to keep open</span></div>';
+      infoWindowContent += '<img class="infowindow-yelp" src="dist/img/yelp-logo.png"></img></div>';
 
       // Create a marker for each place.
       var marker = new google.maps.Marker({
@@ -349,7 +362,7 @@ var ViewModel = function() {
 
       marker.addListener('click', function() {
         // If we have previously animated a marker, stop animating it.
-        if (self.animatedIcon) { self.animatedIcon.setAnimation(null) };
+        if (self.animatedIcon) { self.animatedIcon.setAnimation(null); }
         fullDetailInfoWindow.setContent(this.infoWindowContent);
         fullDetailInfoWindow.open(map, this);
         this.setAnimation(google.maps.Animation.BOUNCE);
@@ -361,10 +374,10 @@ var ViewModel = function() {
       bounds.extend(thisLatLng);
 
       self.placesArray.push( new Place(place, infoWindowContent, marker, thisLatLng) );
-    })
+    });
     // Once loop has completed fit the map to the adjusted bounds object and center the map accordingly.
     map.fitBounds(bounds);
-    map.setCenter(bounds.getCenter());
+    map.panTo(bounds.getCenter());
 
     // Then load up a new heatMapObject, based on the heatMapData array and display it on the map.
     heatMap = new google.maps.visualization.HeatmapLayer({
@@ -379,9 +392,9 @@ var ViewModel = function() {
     // Reset the search box placeholder text.
     self.foodType('');
     self.userLocation('');
-  }
+  };
 
-}
+};
 
 var myViewModel = new ViewModel();
 ko.applyBindings(myViewModel);

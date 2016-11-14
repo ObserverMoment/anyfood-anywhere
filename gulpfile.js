@@ -9,6 +9,10 @@ var gulp = require('gulp'),
 var cssSrcFiles = ['css/style.css'];
 var cssDest = 'dist/css';
 
+gulp.task('default', ['css', 'scripts', 'watch'], function() {
+  // code
+});
+
 // Process CSS
 gulp.task('css', function() {
   return gulp.src(cssSrcFiles)

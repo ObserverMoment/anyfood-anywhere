@@ -27,4 +27,5 @@ You can hover over individual results to see where they are - look for the bounc
 1. Clone the git repository to a local folder.
 2. Make sure you have npm and gulp installed.
 3. run gulp install within the folder that you clones the project to. This should install all the necessary dependencies.
-4. Open the index.html file in your browser.
+4. You can run Gulp at the command line (or gulp watch) if you wish to make changes to the files and then have them process instantly.
+5. Open the index.html file in your browser.

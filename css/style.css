@@ -96,6 +96,14 @@ h1 {
  }
 }
 
+#mapLoadError {
+  display: none;
+}
+#yelpErrorMessage {
+  display: none;
+}
+
+
 /*Map*/
   /*Classes*/
 .mainContent {
@@ -115,17 +123,21 @@ h1 {
   border: 1px solid #dcdcdc;
   border-radius: 6px;
   max-width: 400px;
-  padding: 10px;
-  margin: 5px;
+  padding: 3px;
+  margin: 3px;
 }
 .infowindow-placeName {
   font-style: 1.2;
   color: #7eaf24;
 }
 .infowindow-image {
-  margin: 6px;
+  margin: 3px;
   box-shadow: 1px 0px 2px 0px grey;
   float: left;
+}
+.infowindow-yelp {
+  margin-left: 40px;
+  margin-bottom: 13px;
 }
 .infowindow-phone {
   font-size: 0.8rem;

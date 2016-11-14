@@ -22,41 +22,40 @@
         <input data-bind="textInput: userLocation" id="userLocationInput" class="form-control" type="text" placeholder="in town, city, place?">
         <button id="userLocationSubmit" data-bind="enable: enableSearch" type="submit" class="btn btn-info">Search</button>
       </form>
+      <div id="mapLoadError" class="alert alert-danger">Sorry, there was a problem loading the map! Please try refreshing your browser!</div>
+      <div id="yelpErrorMessage" class="alert alert-danger">Sorry, there was a problem retrieving data from Yelp! Please try refreshing your browser or using different search terms.</div>
     </div>
-    <section class="mainContent card">
-        <section data-bind="css: { openFilter: isFilterOpen() }" class="filter card">
-          <div class="ratingFilter">
-            <label class="form-check-inline">
-              <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating1" value="1" > 1 Stars
-            </label>
-            <label class="form-check-inline">
-              <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating2" value="2"> 2 Stars
-            </label>
-            <label class="form-check-inline">
-              <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating3" value="3"> 3 Stars
-            </label>
-            <label class="form-check-inline">
-              <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating4" value="4"> 4 Stars
-            </label>
-            <label class="form-check-inline">
-              <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating5" value="5"> 5 Stars
-            </label>
-          </div>
-          <div class="textFilter">
-            <input data-bind="textInput: filterText" type="text" placeholder="Text Search" class="form-control">
-          </div>
-          <ul data-bind="foreach: filteredArray" class="list-group">
-            <li data-bind="text: name, click: $parent.zoomToRestaurant, event: { mouseover: $parent.animateIcon, mouseout: $parent.stopAnimateIcon }" class="list-group-item list-inline-item"></li>
-          </ul>
-          <div data-bind="visible: filteredArray().length == 0" class="noResultsMessage">Sorry, no results match</div>
-        </section>
-        <section id="map" class="card"></section>
-
+    <section class="mainContent card">      <section data-bind="css: { openFilter: isFilterOpen() }" class="filter card">
+        <div class="ratingFilter">
+          <label class="form-check-inline">
+            <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating1" value="1" > 1 Stars
+          </label>
+          <label class="form-check-inline">
+            <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating2" value="2"> 2 Stars
+          </label>
+          <label class="form-check-inline">
+            <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating3" value="3"> 3 Stars
+          </label>
+          <label class="form-check-inline">
+            <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating4" value="4"> 4 Stars
+          </label>
+          <label class="form-check-inline">
+            <input class="form-check-input" data-bind="checked: minRating, valueUpdate: 'keyup'" type="radio" name="inlineRadioOptions" id="filterRating5" value="5"> 5 Stars
+          </label>
+        </div>
+        <div class="textFilter">
+          <input data-bind="textInput: filterText" type="text" placeholder="Text Search" class="form-control">
+        </div>
+        <ul data-bind="foreach: filteredArray" class="list-group">
+          <li data-bind="text: name, click: $parent.zoomToRestaurant" class="list-group-item list-inline-item"></li>
+        </ul>
+        <div data-bind="visible: filteredArray().length == 0" class="noResultsMessage">Sorry, no results match</div>
+      </section>
+      <section id="map" class="card"></section>
 
     </section>
 
-
-    </main>
+  </main>
 
 
 
@@ -66,7 +65,7 @@
   <script src="dist/js/allScripts.min.js"></script>
   <!-- <script src="js/oauth-signature.js"></script>
   <script src="js/app.js"></script> -->
-  <script src="https://maps.googleapis.com/maps/api/js?libraries=visualization,geometry,drawing,places&key=AIzaSyC_3rzgTTfkQg1xlQSXn10Brp6hbIh38Q4&callback=initMap"></script>
+  <script async src="https://maps.googleapis.com/maps/api/js?libraries=visualization,geometry,drawing,places&key=AIzaSyC_3rzgTTfkQg1xlQSXn10Brp6hbIh38Q4&callback=initMap" onerror="mapsError()"></script>
   <script>
   </script>
 </body>
